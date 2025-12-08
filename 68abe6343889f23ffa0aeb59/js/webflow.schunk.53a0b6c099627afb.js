@@ -1405,7 +1405,7 @@
                     t ||
                     ((a = e('<a class="w-webflow-badge"></a>').attr(
                       "href",
-                      "https://webflow.com?utm_campaign=brandjs"
+                      ""
                     )),
                     (n = e("<img>")
                       .attr(
@@ -1419,7 +1419,7 @@
                         "src",
                         ""
                       )
-                      .attr("alt", "Made in Webflow")),
+                      .attr("alt", "")),
                     a.append(n, l),
                     a[0])),
                   f(),
