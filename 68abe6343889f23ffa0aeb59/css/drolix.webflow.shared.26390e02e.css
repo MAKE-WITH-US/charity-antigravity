@@ -3370,7 +3370,7 @@ figure {
 .service-item-block {
   grid-column-gap: 20px;
   grid-row-gap: 20px;
-  background-color: #351c4212;
+  background-color: #1c294212;
   border-radius: 16px;
   flex-flow: column;
   padding: 15px;
@@ -3416,7 +3416,7 @@ figure {
 }
 
 .service-item-icon-block {
-  background-color: #351c421a;
+  background-color: #1c2e421a;
   border-radius: 8px;
   flex: none;
   justify-content: center;
@@ -3607,7 +3607,7 @@ figure {
 }
 
 .achievement-content-block {
-  border: 1px solid #351c4240;
+  border: 1px solid #1c314240;
   border-radius: 8px;
   grid-template-rows: auto;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -3624,7 +3624,7 @@ figure {
 .achievement-single-block {
   grid-column-gap: 24px;
   grid-row-gap: 24px;
-  border-right: 1px #351c4240;
+  border-right: 1px #1c2c4240;
   flex-flow: column;
   justify-content: center;
   align-items: center;
@@ -3643,7 +3643,7 @@ figure {
 }
 
 .achievement-liner {
-  background-color: #351c4240;
+  background-color: #1c314240;
   width: 1px;
 }
 
@@ -3982,7 +3982,7 @@ figure {
 .slide-text-block {
   grid-column-gap: 24px;
   grid-row-gap: 24px;
-  border-bottom: 1px dashed #351c4240;
+  border-bottom: 1px dashed #1c294240;
   flex-flow: column;
   justify-content: flex-start;
   align-items: flex-start;
@@ -4050,7 +4050,7 @@ figure {
 
 .testimonial-arrow-block {
   color: var(--color--primary-color);
-  background-color: #351c421a;
+  background-color: #1c32421a;
   border-radius: 8px;
   justify-content: center;
   align-items: center;
@@ -4185,7 +4185,7 @@ figure {
 }
 
 .causes-item-fund-liner-block {
-  background-color: #351c4240;
+  background-color: #1c314240;
   border-radius: 100px;
   width: 100%;
   min-height: 6px;
@@ -4294,7 +4294,7 @@ figure {
 }
 
 .be-a-volunteer-section {
-  background-image: linear-gradient(90deg, #0a0a0ae6, #0a0a0a40), linear-gradient(90deg, #351c42a6, #0000 75%), url("../68b00ff2460925664fde5c05_Volunteer Section BG-min.jpg");
+  background-image: linear-gradient(90deg, #0a0a0ae6, #0a0a0a40), linear-gradient(90deg, #1c3042a6, #0000 75%), url("../68b00ff2460925664fde5c05_Volunteer Section BG-min.jpg");
   background-position: 0 0, 0 0, 50%;
   background-size: auto, auto, cover;
 }
@@ -4319,7 +4319,7 @@ figure {
 .single-volunteer-block {
   grid-column-gap: 30px;
   grid-row-gap: 30px;
-  border: 1px solid #351c4240;
+  border: 1px solid #1c2c4240;
   border-radius: 16px;
   padding: 20px 40px 20px 20px;
   display: flex;
@@ -4367,7 +4367,7 @@ figure {
 
 .volunteer-social-block {
   color: var(--color--primary-color);
-  background-color: #351c421a;
+  background-color: #1c31421a;
   border-radius: 8px;
   justify-content: center;
   align-items: center;
@@ -4470,7 +4470,7 @@ figure {
 }
 
 .purpose-content-block {
-  background-color: #351c420d;
+  background-color: #1c30420d;
   border-radius: 16px;
   padding: 40px;
 }
@@ -4655,7 +4655,7 @@ figure {
 }
 
 .faq-single-item {
-  background-color: #351c420d;
+  background-color: #1c2d420d;
   border: 1px solid #1c2d4226;
   border-radius: 16px;
   width: 100%;
@@ -4817,7 +4817,7 @@ figure {
 }
 
 .about-hero-video-overlay {
-  background-color: #351c4240;
+  background-color: #1c374240;
   position: absolute;
   inset: 0%;
 }
@@ -4882,7 +4882,7 @@ figure {
 }
 
 .contact-wrapper {
-  background-color: #351c420d;
+  background-color: #1c30420d;
   justify-content: space-between;
   align-items: stretch;
   display: flex;
