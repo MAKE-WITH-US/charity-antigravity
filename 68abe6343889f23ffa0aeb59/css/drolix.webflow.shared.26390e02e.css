@@ -1971,7 +1971,7 @@ textarea.w-input, textarea.w-select {
   --font-line-height--body-text-lg: 30px;
   --font-weight--normal-400: 400;
   --font-family--title-font: Inter, sans-serif;
-  --color--primary-color: #1c2842;
+  --color--primary-color: #234b96e0;
   --font-size--heading-1: 56px;
   --font-line-height--heading-1: 68px;
   --font-weight--semi-bold-600: 600;
@@ -2901,7 +2901,7 @@ figure {
 }
 
 .footer {
-  background-color: #0058ffa3;
+  background-color: #234b96e0;
   position: relative;
 }
 
