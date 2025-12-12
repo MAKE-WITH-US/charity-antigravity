@@ -2183,11 +2183,6 @@ ol {
   padding-left: 40px;
 }
 
-img {
-  max-width: 100%;
-  display: inline-block;
-}
-
 blockquote {
   font-family: var(--font-family--title-font);
   text-align: center;
