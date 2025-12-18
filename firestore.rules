@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Blogs: Public Read, Admin Write
+    match /blogs/{blogId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // File Logs: Public Write (Create), Admin Read/Write
+    // Assuming file sending is done by public users without auth?
+    // Current flow: public sends files.
+    // If public sends file, they must likely be able to create.
+    match /file-logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    // Admins Collection (Direct access restricted, managed via Auth mostly)
+    match /admins/{adminId} {
+      allow read: if request.auth != null;
+    }
+  }
+}

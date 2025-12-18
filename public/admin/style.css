@@ -1,0 +1,500 @@
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    background-color: #f4f5f7;
+    color: #351C42;
+    /* Primary Color as Text base for headers usually, or keep dark gray for text and use primary for accents. Let's use dark gray for body text but headings in primary */
+    color: #4a4a4a;
+    line-height: 1.6;
+}
+
+.view {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Typography Overrides */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #351C42;
+    /* Primary Color */
+}
+
+/* Logos */
+.admin-logo {
+    max-width: 180px;
+    height: auto;
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dashboard-logo {
+    height: 40px;
+    width: auto;
+    margin-right: 15px;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+}
+
+/* Login */
+.login-container {
+    max-width: 420px;
+    margin: 80px auto;
+    padding: 50px 40px;
+    background: white;
+    box-shadow: 0 10px 40px rgba(53, 28, 66, 0.1);
+    /* Primary color shadow tint */
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid rgba(53, 28, 66, 0.05);
+}
+
+.login-container h2 {
+    margin-bottom: 30px;
+    color: #351C42;
+    font-weight: 700;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    box-sizing: border-box;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s;
+    background-color: #fbfbfb;
+}
+
+.login-container input:focus {
+    border-color: #351C42;
+    /* Primary */
+    background-color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(53, 28, 66, 0.1);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 14px;
+    background: #351C42;
+    /* Primary */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.login-container button:hover {
+    background: #4a275c;
+    /* Lighter Primary or just darken */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(53, 28, 66, 0.2);
+}
+
+/* Dashboard */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    margin-bottom: 40px;
+    border-radius: 12px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #351C42;
+}
+
+/* Navigation */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 8px;
+    background: #f4f5f7;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #666;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.nav-btn.active {
+    background-color: white;
+    color: #351C42;
+    /* Primary */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.nav-btn:hover:not(.active) {
+    background-color: #e9ecef;
+    color: #351C42;
+}
+
+#logout-btn {
+    background-color: transparent;
+    border: 1px solid #e1e4e8;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #666;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#logout-btn:hover {
+    background-color: #fff0f0;
+    color: #d32f2f;
+    border-color: #ffcccc;
+}
+
+.toolbar {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toolbar h2 {
+    margin: 0;
+    color: #351C42;
+    font-weight: 700;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 18px 24px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+th {
+    background-color: #fafbfc;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: #fcfcfc;
+}
+
+.thumb-small {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #351C42;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border 0.2s;
+    background-color: #fff;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #351C42;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(53, 28, 66, 0.1);
+}
+
+.primary-btn {
+    padding: 12px 28px;
+    background: #351C42;
+    /* Primary */
+    color: #F6D469;
+    /* Secondary for text if needed, or stick to white. Style guide shows buttons are solid. Let's try White text on Primary bg, or check style guide again. Style guide used white text. */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+    font-size: 15px;
+}
+
+.primary-btn:hover {
+    background: #4a275c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(53, 28, 66, 0.2);
+}
+
+.btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-right: 8px;
+    transition: opacity 0.2s;
+}
+
+.btn-sm:hover {
+    opacity: 0.9;
+}
+
+.btn-edit {
+    background: #fff8e1;
+    /* Light Goldish */
+    border: 1px solid #ffe082;
+    color: #b78900;
+}
+
+.btn-delete {
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    color: #e53e3e;
+}
+
+/* File Send Layout */
+.file-send-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.file-form-card,
+.file-logs-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.file-form-card h3,
+.file-logs-card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    color: #351C42;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+}
+
+.toast {
+    background-color: #351C42;
+    color: white;
+    padding: 16px 24px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 500;
+    min-width: 300px;
+    animation: slideIn 0.3s ease-out, fadeOut 0.5s 2.5s forwards;
+    border-left: 4px solid #F6D469;
+    /* Secondary for accent */
+}
+
+.toast.success {
+    background-color: #351C42;
+}
+
+.toast.success::before {
+    background: #F6D469;
+    color: #351C42;
+}
+
+.toast::before {
+    content: "✓";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: #F6D469;
+    color: #351C42;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Split View for Blog Editor */
+.editor-container {
+    display: flex;
+    gap: 30px;
+    height: calc(100vh - 120px);
+}
+
+.editor-form-column {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 15px;
+    min-width: 450px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.editor-preview-column {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.preview-header {
+    background: #fafbfc;
+    padding: 16px;
+    border-bottom: 1px solid #e1e4e8;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #6c757d;
+    text-align: center;
+    letter-spacing: 0.8px;
+}
+
+#blog-preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .editor-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .editor-preview-column {
+        height: 600px;
+    }
+
+    .file-send-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-right {
+        display: none;
+        /* Mobile menu needed if complex, but simplified here */
+    }
+}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Charity Blog</title>
+    <link rel="stylesheet" href="/public/admin/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Login Section -->
+        <div id="login-view" class="view">
+            <div class="login-container">
+                <img src="/images/chkarunyatrustlogo.png" alt="Karunya Charitable Trust" class="admin-logo mb-4">
+                <h2>Admin Login</h2>
+                <form id="login-form">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <div class="password-wrapper" style="position: relative;">
+                        <input type="password" id="password" placeholder="Password" required
+                            style="width: 100%; padding-right: 40px;">
+                        <span id="toggle-password"
+                            style="position: absolute; right: 12px; top: 22px; transform: translateY(-50%); cursor: pointer; user-select: none;">👁️</span>
+                    </div>
+                    <button type="submit">Login</button>
+                    <p id="login-error" class="error"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-view" class="view hidden">
+            <header>
+                <div class="header-brand">
+                    <img src="/images/chkarunyatrustlogo.png" alt="Logo" class="dashboard-logo">
+                    <h1>Admin Panel</h1>
+                </div>
+                <div class="header-right">
+                    <nav class="admin-nav">
+                        <button id="nav-blogs" class="nav-btn active">Blogs</button>
+                        <button id="nav-files" class="nav-btn">Send Files</button>
+                    </nav>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </header>
+            <main>
+                <!-- Blogs Tab -->
+                <div id="tab-blogs" class="tab-content">
+                    <div class="toolbar">
+                        <h2>Blog Management</h2>
+                        <button id="add-blog-btn" class="primary-btn">Add New Blog</button>
+                    </div>
+                    <table id="blogs-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blogs-list"></tbody>
+                    </table>
+                </div>
+
+                <!-- Send Files Tab -->
+                <div id="tab-files" class="tab-content hidden">
+                    <div class="toolbar">
+                        <h2>Send Files to Patients</h2>
+                    </div>
+
+                    <div class="file-send-container">
+                        <div class="file-form-card">
+                            <h3>New Transfer</h3>
+                            <form id="file-send-form">
+                                <div class="form-group">
+                                    <label>Patient Name</label>
+                                    <input type="text" id="patient-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="patient-phone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="patient-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Select File</label>
+                                    <input type="file" id="patient-file" required>
+                                </div>
+                                <button type="submit" class="primary-btn">Send File</button>
+                            </form>
+                        </div>
+
+                        <div class="file-logs-card">
+                            <h3>Recent Logs</h3>
+                            <table id="file-logs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Patient</th>
+                                        <th>File</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="file-logs-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Editor Section -->
+        <div id="editor-view" class="view hidden">
+            <header>
+                <h1 id="editor-title">Add Blog</h1>
+                <button id="cancel-edit-btn">Cancel</button>
+            </header>
+            <main>
+                <div class="editor-container">
+                    <!-- Left: Form -->
+                    <div class="editor-form-column">
+                        <form id="blog-form">
+                            <input type="hidden" id="blog-id">
+
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" id="blog-title" required placeholder="Enter blog title...">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Slug (URL Friendly)</label>
+                                <input type="text" id="blog-slug" required placeholder="auto-generated-slug">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description (Short)</label>
+                                <textarea id="blog-description" rows="3" required
+                                    placeholder="Short summary for the card..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Featured Image</label>
+                                <input type="file" id="blog-image" accept="image/*">
+                                <img id="image-preview" src=""
+                                    style="max-width: 200px; display: none; margin-top: 10px;">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sub Heading</label>
+                                <input type="text" id="blog-subheading" placeholder="Enter a sub heading..."
+                                    style="display: block;">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Content (HTML Supported)</label>
+                                <textarea id="blog-content" rows="15" required
+                                    placeholder="<p>Start writing your content here...</p>"></textarea>
+                                <small>Use &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;blockquote&gt; for styling.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="blog-status">
+                                    <option value="published">Published</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Author</label>
+                                <input type="text" id="blog-author" value="Admin">
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="primary-btn">Save Blog</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right: Live Preview -->
+                    <div class="editor-preview-column">
+                        <div class="preview-header">Live Preview (Desktop)</div>
+                        <iframe id="blog-preview-iframe" src="/public/admin/preview.html" title="Live Preview"
+                            loading="lazy"></iframe>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    <script type="module" src="/public/admin/script.js"></script>
+</body>
+
+</html>
