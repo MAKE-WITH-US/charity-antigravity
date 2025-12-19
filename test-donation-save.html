@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Donation Save</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        button {
+            background-color: #351C42;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background-color: #2a1535;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Test Donation Save to Firebase</h1>
+    <p>This page will test if donations can be saved to Firebase (simulating what happens in live mode).</p>
+
+    <button id="testBtn">Test Save Donation</button>
+    <div id="result"></div>
+
+    <script type="module">
+        import { addDonation } from './js/firebase-service.js';
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Saving test donation...';
+            resultDiv.className = '';
+
+            try {
+                const testDonation = {
+                    amount: 500,
+                    currency: 'INR',
+                    donorName: 'Test User',
+                    donorEmail: 'test@example.com',
+                    donationType: 'Financial Donation',
+                    paymentMethod: 'Credit Card',
+                    message: 'Test donation from test page',
+                    paymentId: 'test_' + Date.now(),
+                    status: 'success'
+                };
+
+                const docId = await addDonation(testDonation);
+
+                resultDiv.textContent = `✓ Success! Donation saved with ID: ${docId}. Check the admin panel to see it.`;
+                resultDiv.className = 'success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Error: ${error.message}`;
+                resultDiv.className = 'error';
+                console.error('Error saving donation:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

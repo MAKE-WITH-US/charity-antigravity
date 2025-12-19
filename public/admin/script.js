@@ -9,7 +9,8 @@ import {
     uploadImage,
     createReportLog,
     uploadReportFile,
-    getFileLogs
+    getFileLogs,
+    getRecentDonations
 } from '/js/firebase-service.js';
 
 // Initialize EmailJS
@@ -103,24 +104,48 @@ function showEditor(blog = null) {
 // Navigation & Tabs
 const navBlogs = document.getElementById('nav-blogs');
 const navFiles = document.getElementById('nav-files');
+const navDonations = document.getElementById('nav-donations');
+
 const tabBlogs = document.getElementById('tab-blogs');
 const tabFiles = document.getElementById('tab-files');
+const tabDonations = document.getElementById('tab-donations');
+const donationsList = document.getElementById('donations-list');
 
 if (navBlogs && navFiles) {
     navBlogs.addEventListener('click', () => {
         navBlogs.classList.add('active');
         navFiles.classList.remove('active');
+        if (navDonations) navDonations.classList.remove('active');
+
         tabBlogs.classList.remove('hidden');
         tabFiles.classList.add('hidden');
+        if (tabDonations) tabDonations.classList.add('hidden');
     });
 
     navFiles.addEventListener('click', () => {
         navFiles.classList.add('active');
         navBlogs.classList.remove('active');
+        if (navDonations) navDonations.classList.remove('active');
+
         tabFiles.classList.remove('hidden');
         tabBlogs.classList.add('hidden');
+        if (tabDonations) tabDonations.classList.add('hidden');
         fetchFileLogs();
     });
+
+    if (navDonations) {
+        navDonations.addEventListener('click', () => {
+            navDonations.classList.add('active');
+            navBlogs.classList.remove('active');
+            navFiles.classList.remove('active');
+
+            tabDonations.classList.remove('hidden');
+            tabBlogs.classList.add('hidden');
+            tabFiles.classList.add('hidden');
+
+            fetchDonations();
+        });
+    }
 }
 
 // Toast Function
@@ -408,6 +433,31 @@ async function fetchFileLogs() {
         `).join('');
     } catch (error) {
         console.error('Error fetching logs', error);
+    }
+}
+
+async function fetchDonations() {
+    try {
+        const donations = await getRecentDonations();
+
+        if (donations.length === 0) {
+            donationsList.innerHTML = `<tr><td colspan="4" style="text-align:center;">No donations found yet.</td></tr>`;
+        } else {
+            donationsList.innerHTML = donations.map(d => `
+                <tr>
+                    <td>${new Date(d.donatedAt).toLocaleString()}</td>
+                    <td>
+                        <strong>${d.donorName || 'Anonymous'}</strong><br>
+                        <small>${d.donorEmail || ''}</small>
+                    </td>
+                    <td>₹${d.amount}</td>
+                    <td><code>${d.paymentId}</code></td>
+                </tr>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error fetching donations', error);
+        donationsList.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading data.</td></tr>`;
     }
 }
 

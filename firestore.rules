@@ -12,9 +12,16 @@ service cloud.firestore {
     // Assuming file sending is done by public users without auth?
     // Current flow: public sends files.
     // If public sends file, they must likely be able to create.
-    match /file-logs/{logId} {
+    // Sent Reports (Previously file-logs): Public Write (Create), Admin Read/Write
+    match /sent-reports/{logId} {
       allow create: if true;
       allow read, update, delete: if request.auth != null;
+    }
+
+    // Donations: Public Create, Admin Read
+    match /donations/{donationId} {
+      allow create: if true;
+      allow read: if request.auth != null;
     }
     
     // Admins Collection (Direct access restricted, managed via Auth mostly)

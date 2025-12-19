@@ -57,6 +57,13 @@ app.get('/blog-post/:slug', (req, res) => {
     res.sendFile(path.join(__dirname, 'blog-post/charity-meals-that-change-the-lives-every-day.html'));
 });
 
+// Configuration Endpoint (Securely serve public keys)
+app.get('/api/config', (req, res) => {
+    res.json({
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID
+    });
+});
+
 // Admin Panel Route
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/admin/index.html'));

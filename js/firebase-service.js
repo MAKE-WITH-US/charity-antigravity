@@ -14,7 +14,9 @@ import {
     deleteDoc,
     query,
     where,
-    orderBy
+    orderBy,
+    limit,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // --- Auth Services ---
@@ -191,3 +193,40 @@ export const uploadReportFile = async (file) => {
         throw error;
     }
 };
+
+// --- Donation Services ---
+
+const DONATIONS_COLLECTION = 'donations';
+
+export const addDonation = async (donationData) => {
+    try {
+        const docRef = await addDoc(collection(db, DONATIONS_COLLECTION), {
+            ...donationData,
+            donatedAt: serverTimestamp()
+        });
+        return docRef.id;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getRecentDonations = async (limitCount = 20) => {
+    try {
+        const q = query(
+            collection(db, DONATIONS_COLLECTION),
+            orderBy('donatedAt', 'desc'),
+            limit(limitCount)
+        );
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            _id: doc.id,
+            ...doc.data(),
+            donatedAt: doc.data().donatedAt ? doc.data().donatedAt.toDate() : new Date()
+        }));
+    } catch (error) {
+        console.error("Error fetching donations: ", error);
+        return [];
+    }
+};
+
+export { serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
