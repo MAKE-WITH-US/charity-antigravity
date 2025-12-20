@@ -1,0 +1,67 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "*.html",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "js/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "css/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "images/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "ajax/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "gsap/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "fonts/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "68abe6343889f23ffa0aeb59/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "68ad3e12591a81fed1f9da20/**",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "server.js"
+        },
+        {
+            "src": "/blog-post/(.*)",
+            "dest": "server.js"
+        },
+        {
+            "src": "/admin",
+            "dest": "server.js"
+        },
+        {
+            "src": "/",
+            "dest": "index.htm"
+        }
+    ]
+}
