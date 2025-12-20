@@ -1,16 +1,86 @@
 {
-    "rewrites": [
+    "version": 2,
+    "builds": [
         {
-            "source": "/api/(.*)",
-            "destination": "/server.js"
+            "src": "server.js",
+            "use": "@vercel/node"
         },
         {
-            "source": "/admin",
-            "destination": "/server.js"
+            "src": "**/*.html",
+            "use": "@vercel/static"
         },
         {
-            "source": "/blog-post/:slug",
-            "destination": "/server.js"
+            "src": "**/*.htm",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "68*/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "images/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "js/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "ajax/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "favicon/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "gsap/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "static/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "data/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "service/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "blog-post/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "blog-category/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "causes/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "template-info/**",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/server.js"
+        },
+        {
+            "src": "/admin",
+            "dest": "/server.js"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/$1"
         }
     ]
 }
