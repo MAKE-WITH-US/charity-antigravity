@@ -1,47 +1,16 @@
 {
-    "version": 2,
-    "builds": [
+    "rewrites": [
         {
-            "src": "server.js",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/server.js"
+            "source": "/api/(.*)",
+            "destination": "/server.js"
         },
         {
-            "src": "/admin",
-            "dest": "/server.js"
+            "source": "/admin",
+            "destination": "/server.js"
         },
         {
-            "src": "/blog-post/([^/]+)",
-            "dest": "/server.js"
-        },
-        {
-            "src": "/(.*\\.(css|js|jpg|jpeg|png|gif|svg|webp|mp4|webm|woff|woff2|ttf|eot|ico|json|xml|txt))",
-            "dest": "/$1"
-        },
-        {
-            "src": "/(68[^/]+)/(.+)",
-            "dest": "/$1/$2"
-        },
-        {
-            "src": "/(images|js|ajax|favicon|gsap|static|public|data|service|blog-post|blog-category|causes|template-info)/(.+)",
-            "dest": "/$1/$2"
-        },
-        {
-            "src": "/(.*\\.html?)$",
-            "dest": "/$1"
-        },
-        {
-            "src": "/",
-            "dest": "/index.htm"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/server.js"
+            "source": "/blog-post/:slug",
+            "destination": "/server.js"
         }
     ]
 }
