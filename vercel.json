@@ -1,13 +1,22 @@
 {
     "version": 2,
-    "routes": [
+    "cleanUrls": true,
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "server.js"
+            "source": "/api/(.*)",
+            "destination": "/server.js"
         },
         {
-            "src": "/(.*)",
-            "dest": "/index.htm"
+            "source": "/admin",
+            "destination": "/public/admin/index.html"
+        },
+        {
+            "source": "/blog-post/(.*)",
+            "destination": "/blog-post/charity-meals-that-change-the-lives-every-day.html"
+        },
+        {
+            "source": "/",
+            "destination": "/index.htm"
         }
     ]
 }

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 
@@ -15,6 +16,11 @@ app.get('/api/config', (req, res) => {
     res.json({
         razorpayKeyId: process.env.RAZORPAY_KEY_ID
     });
+});
+
+// Root fallback (handled by vercel.json rewrites normally)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.htm'));
 });
 
 // For local testing
