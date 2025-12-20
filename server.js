@@ -11,6 +11,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from root directory
+app.use(express.static(__dirname));
+
 // Configuration Endpoint
 app.get('/api/config', (req, res) => {
     res.json({
