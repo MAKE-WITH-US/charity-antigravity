@@ -15,7 +15,7 @@
             "destination": "/blog-post/charity-meals-that-change-the-lives-every-day.html"
         },
         {
-            "source": "/",
+            "source": "/((?!68abe6343889f23ffa0aeb59|68ad3e12591a81fed1f9da20|images|css|js|ajax|gsap|fonts|favicon|public|static|favicon\\.ico).*)",
             "destination": "/index.htm"
         }
     ]
