@@ -1,0 +1,3 @@
+# Keep data files in deployment
+!data/
+!public/uploads/
