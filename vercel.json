@@ -1,22 +1,17 @@
 {
     "version": 2,
     "cleanUrls": true,
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "/server.js"
+            "handle": "filesystem"
         },
         {
-            "source": "/admin",
-            "destination": "/public/admin/index.html"
+            "src": "/api/(.*)",
+            "dest": "/server.js"
         },
         {
-            "source": "/blog-post/(.*)",
-            "destination": "/blog-post/charity-meals-that-change-the-lives-every-day.html"
-        },
-        {
-            "source": "/((?!68abe6343889f23ffa0aeb59|68ad3e12591a81fed1f9da20|images|css|js|ajax|gsap|fonts|favicon|public|static|favicon\\.ico).*)",
-            "destination": "/index.htm"
+            "src": "/(.*)",
+            "dest": "/server.js"
         }
     ]
 }
