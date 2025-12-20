@@ -16,7 +16,7 @@
         },
         {
             "source": "/",
-            "destination": "/index.htm"
+            "destination": "index.htm"
         }
     ]
 }
