@@ -61,7 +61,7 @@
         },
         {
             "src": "/",
-            "dest": "index.htm"
+            "dest": "index.html"
         }
     ]
 }
