@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Charity Blog</title>
-    <link rel="stylesheet" href="/public/admin/style.css">
+    <link rel="stylesheet" href="/admin/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-touch-icon.png">
@@ -166,9 +166,11 @@
 
                             <div class="form-group">
                                 <label>Sub Heading (appears below image)</label>
-                                <input type="text" id="blog-subheading" placeholder="Enter a sub heading that appears below the featured image..."
+                                <input type="text" id="blog-subheading"
+                                    placeholder="Enter a sub heading that appears below the featured image..."
                                     style="display: block;">
-                                <small style="color: #666; display: block; margin-top: 5px;">This subheading will appear below the featured image in the blog post.</small>
+                                <small style="color: #666; display: block; margin-top: 5px;">This subheading will appear
+                                    below the featured image in the blog post.</small>
                             </div>
 
                             <div class="form-group">
@@ -200,7 +202,7 @@
                     <!-- Right: Live Preview -->
                     <div class="editor-preview-column">
                         <div class="preview-header">Live Preview (Desktop)</div>
-                        <iframe id="blog-preview-iframe" src="/public/admin/preview.html" title="Live Preview"
+                        <iframe id="blog-preview-iframe" src="/admin/preview.html" title="Live Preview"
                             loading="lazy"></iframe>
                     </div>
                 </div>
@@ -210,7 +212,7 @@
 
     <!-- Toast Container -->
     <div id="toast-container"></div>
-    <script type="module" src="/public/admin/script.js"></script>
+    <script type="module" src="/admin/script.js"></script>
 </body>
 
 </html>
