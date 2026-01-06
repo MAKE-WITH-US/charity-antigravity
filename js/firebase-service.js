@@ -1,9 +1,14 @@
-import { auth, db } from './firebase-config.js';
+import { auth, db, storage } from './firebase-config.js';
 import {
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import {
+    ref,
+    uploadBytesResumable,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 import {
     collection,
     getDocs,
@@ -48,7 +53,6 @@ const BLOGS_COLLECTION = 'blogs';
 
 export const getAllBlogs = async () => {
     try {
-        // Order by createdAt descending
         const q = query(collection(db, BLOGS_COLLECTION), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({
@@ -115,8 +119,8 @@ export const createReportLog = async (data) => {
     try {
         await addDoc(collection(db, REPORTS_COLLECTION), {
             ...data,
-            sentAt: new Date().toISOString(), // Requirements say 'sentAt'
-            createdAt: new Date().toISOString() // Keep createdAt for consistency if needed, but requirements strict
+            sentAt: new Date().toISOString(),
+            createdAt: new Date().toISOString()
         });
     } catch (error) {
         throw error;
@@ -164,32 +168,99 @@ export const uploadImage = async (file) => {
     }
 };
 
-// REPORT UPLOAD (Strict Requirements: auto/upload, reports folder)
+// REPORT UPLOAD - Fixed to use correct resource_type and presets
 export const uploadReportFile = async (file) => {
     try {
+        // 1. DYNAMIC FILE TYPE DETECTION
+        // Do NOT rely on file.type alone as it can be unreliable
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+        // 2. RESOURCE TYPE & PRESET SELECTION
+        // "blog_unsigned" is likely an image-only preset (with transformations)
+        // We use "pdf_raw_unsigned" for RAW files as requested (or fallback to 'blog_unsigned' if not set, but strict endpoint is key)
+        const resourceType = isPdf ? 'raw' : 'image';
+        const uploadPreset = isPdf ? 'pdf_raw_unsigned' : CLOUDINARY_UPLOAD_PRESET;
+
+        // 3. CORRECT ENDPOINT UPLOAD
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('folder', 'reports'); // Explicit requirement
+        formData.append('upload_preset', uploadPreset);
+        formData.append('folder', 'reports');
 
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
+        console.log(`Uploading ${file.name} as ${resourceType} using preset ${uploadPreset}`);
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, {
             method: 'POST',
             body: formData
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Report upload failed');
+            console.error('Cloudinary Error:', errorData);
+            throw new Error(errorData.error?.message || `Upload failed: ${response.statusText}`);
         }
 
         const data = await response.json();
-        // Return secure_url and format (for fileType) if needed
+
+        let finalUrl = data.secure_url;
+
+        // 4. FIX URL FOR DOWNLOAD
+        if (isPdf && finalUrl) {
+            // raw/upload URLs usually don't have transformations, but we add fl_attachment
+            // to ensure the browser strictly downloads it.
+            // If the URL logic is standard: res.cloudinary.com/<cloud>/raw/upload/v<ver>/<id>.pdf
+            // We want: res.cloudinary.com/<cloud>/raw/upload/fl_attachment/v<ver>/<id>.pdf
+            if (!finalUrl.includes('fl_attachment')) {
+                finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
+            }
+        }
+
         return {
-            url: data.secure_url,
-            format: data.format || file.name.split('.').pop()
+            url: finalUrl,
+            format: data.format || (isPdf ? 'pdf' : 'jpg')
         };
     } catch (error) {
         console.error("Report upload failed:", error);
+        throw error;
+    }
+};
+
+// FIREBASE STORAGE UPLOAD
+export const uploadFileToStorage = async (file, onProgress) => {
+    try {
+        const date = new Date();
+        const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const fileName = `${Date.now()}_${file.name}`;
+        const storagePath = `admin-uploads/${yearMonth}/${fileName}`;
+
+        const storageRef = ref(storage, storagePath);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        return new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    if (onProgress) onProgress(progress);
+                    console.log('Upload is ' + progress + '% done');
+                },
+                (error) => {
+                    console.error("Firebase Storage Upload Error:", error);
+                    reject(error);
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve({
+                        url: downloadURL,
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        path: storagePath
+                    });
+                }
+            );
+        });
+    } catch (error) {
+        console.error("Upload function error:", error);
         throw error;
     }
 };

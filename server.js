@@ -242,9 +242,21 @@ app.get('/api/config', (req, res) => {
     });
 });
 
-// ============ STATIC ROUTES ============
+// Specific route for Send Files page (Cloudinary version)
+app.get('/admin/send-files.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/admin/send-files.html'));
+});
 
-// Admin Panel Route
+// Specific route for File Sending page (Direct EmailJS version)
+app.get('/admin/file-sending', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/admin/file-sending.html'));
+});
+
+// Admin Panel Static Files
+// This allows other assets like css/js to be served
+app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
+
+// Admin Panel Main Route
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/admin/index.html'));
 });

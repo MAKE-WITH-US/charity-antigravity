@@ -123,15 +123,9 @@ if (navBlogs && navFiles) {
     });
 
     navFiles.addEventListener('click', () => {
-        navFiles.classList.add('active');
-        navBlogs.classList.remove('active');
-        if (navDonations) navDonations.classList.remove('active');
-
-        tabFiles.classList.remove('hidden');
-        tabBlogs.classList.add('hidden');
-        if (tabDonations) tabDonations.classList.add('hidden');
-        fetchFileLogs();
+        window.location.href = '/admin/send-files.html';
     });
+
 
     if (navDonations) {
         navDonations.addEventListener('click', () => {
@@ -218,18 +212,53 @@ const handleEditBlog = async (id) => {
 };
 
 const handleDeleteBlog = async (id) => {
-    console.log("Delete requested for:", id);
-    if (confirm('Are you sure you want to delete this blog? This action cannot be undone.')) {
+    if (!id) {
+        console.error("No ID provided for deletion");
+        return;
+    }
+
+    // Strict Hard Delete Requirement: Single Confirmation
+    if (confirm('Are you sure you want to permanently delete this blog?')) {
+        const btn = document.querySelector(`button[data-id="${id}"]`);
+        const row = btn ? btn.closest('tr') : null;
+
         try {
+            if (row) row.style.opacity = '0.3';
+            showToast('Deleting blog...', 2000);
+
+            // 1. Hard Delete from Firestore
             await deleteBlog(id);
-            showToast('Blog deleted successfully!', 1500);
-            await fetchBlogs();
+
+            // 2. Immediate UI Update (Remove from DOM)
+            if (row) {
+                row.remove();
+            }
+            showToast('Blog deleted permanently.', 2000, 'success');
+
         } catch (error) {
             console.error("Delete failed:", error);
             alert('Failed to delete blog: ' + error.message);
+            if (row) row.style.opacity = '1';
         }
     }
 };
+
+// Event Delegation for Blog Actions (Edit/Delete)
+blogsList.addEventListener('click', (e) => {
+    const target = e.target;
+
+    // Handle Delete
+    if (target.classList.contains('btn-delete')) {
+        const id = target.dataset.id;
+        handleDeleteBlog(id);
+    }
+
+    // Handle Edit
+    if (target.classList.contains('btn-edit')) {
+        const id = target.dataset.id;
+        handleEditBlog(id);
+    }
+});
 
 async function fetchBlogs() {
     try {
@@ -240,24 +269,17 @@ async function fetchBlogs() {
         } else {
             blogsList.innerHTML = blogs.map(blog => `
                 <tr>
-                    <td><img src="${blog.featuredImage || 'https://placehold.co/100x100?text=No+Image'}" class="thumb-small"></td>
-                    <td>${blog.title}</td>
-                    <td>${blog.status}</td>
+                    <td><img src="${blog.featuredImage || 'https://placehold.co/100x100?text=No+Image'}" class="thumb-small" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+                    <td><strong>${blog.title}</strong></td>
+                    <td><span class="badge ${blog.status === 'published' ? 'bg-success' : 'bg-secondary'}">${blog.status}</span></td>
                     <td>
                         <button class="btn-sm btn-edit" data-id="${blog._id}">Edit</button>
-                        <!-- <button class="btn-sm btn-delete" data-id="${blog._id}">Delete</button> -->
+                        <button class="btn-sm btn-delete" data-id="${blog._id}" style="background-color: #dc3545; color: white; margin-left: 5px;">Delete</button>
                     </td>
                 </tr>
             `).join('');
 
-            // Attach Event Listeners Safely
-            blogsList.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', () => handleEditBlog(btn.dataset.id));
-            });
-
-            // blogsList.querySelectorAll('.btn-delete').forEach(btn => {
-            //     btn.addEventListener('click', () => handleDeleteBlog(btn.dataset.id));
-            // });
+            // Note: Event listeners are now handled via delegation above
         }
     } catch (err) {
         console.error(err);

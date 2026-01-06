@@ -493,8 +493,45 @@ select:focus {
 }
 
 @media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+
     .header-right {
-        display: none;
-        /* Mobile menu needed if complex, but simplified here */
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .toolbar h2 {
+        margin-bottom: 10px;
+    }
+
+    .view {
+        padding: 15px;
+    }
+
+    /* Table Scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    table {
+        min-width: 600px;
+        /* Force scroll */
+        box-shadow: none;
+        /* Shadow moving to container */
     }
 }

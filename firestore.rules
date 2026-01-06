@@ -5,7 +5,7 @@ service cloud.firestore {
     // Blogs: Public Read, Admin Write
     match /blogs/{blogId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create, update, delete: if request.auth != null;
     }
     
     // File Logs: Public Write (Create), Admin Read/Write
