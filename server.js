@@ -17,6 +17,9 @@ app.use(express.json());
 // Serve static files from root directory
 app.use(express.static(__dirname));
 
+// Ensure /js routes work locally by mapping /js to public/js
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+
 // File upload configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
