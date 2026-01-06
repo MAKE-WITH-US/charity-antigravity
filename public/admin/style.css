@@ -15,7 +15,15 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+#donation-modal:not(.hidden) {
+    display: flex;
+}
+
+#screenshot-modal:not(.hidden) {
+    display: flex;
 }
 
 /* Typography Overrides */
@@ -401,6 +409,15 @@ select:focus {
     border-radius: 50%;
     font-size: 14px;
     font-weight: bold;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes slideIn {

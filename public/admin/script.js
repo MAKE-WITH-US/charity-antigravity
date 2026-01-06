@@ -13,11 +13,13 @@ import {
     getRecentDonations
 } from '/js/firebase-service.js';
 
-// Initialize EmailJS
-try {
-    emailjs.init("s-yzfkw_g8ZBWm5WJ");
-} catch (e) {
-    console.error("EmailJS Init Error:", e);
+// Initialize EmailJS (client-side only)
+if (typeof window !== 'undefined' && typeof emailjs !== 'undefined') {
+    try {
+        emailjs.init("s-yzfkw_g8ZBWm5WJ");
+    } catch (e) {
+        console.error("EmailJS Init Error:", e);
+    }
 }
 
 // Elements
@@ -104,42 +106,22 @@ function showEditor(blog = null) {
 // Navigation & Tabs
 const navBlogs = document.getElementById('nav-blogs');
 const navFiles = document.getElementById('nav-files');
-const navDonations = document.getElementById('nav-donations');
 
 const tabBlogs = document.getElementById('tab-blogs');
 const tabFiles = document.getElementById('tab-files');
-const tabDonations = document.getElementById('tab-donations');
-const donationsList = document.getElementById('donations-list');
 
 if (navBlogs && navFiles) {
     navBlogs.addEventListener('click', () => {
         navBlogs.classList.add('active');
         navFiles.classList.remove('active');
-        if (navDonations) navDonations.classList.remove('active');
 
         tabBlogs.classList.remove('hidden');
         tabFiles.classList.add('hidden');
-        if (tabDonations) tabDonations.classList.add('hidden');
     });
 
     navFiles.addEventListener('click', () => {
         window.location.href = '/admin/send-files.html';
     });
-
-
-    if (navDonations) {
-        navDonations.addEventListener('click', () => {
-            navDonations.classList.add('active');
-            navBlogs.classList.remove('active');
-            navFiles.classList.remove('active');
-
-            tabDonations.classList.remove('hidden');
-            tabBlogs.classList.add('hidden');
-            tabFiles.classList.add('hidden');
-
-            fetchDonations();
-        });
-    }
 }
 
 // Toast Function
@@ -203,7 +185,8 @@ logoutBtn.addEventListener('click', async () => {
 const handleEditBlog = async (id) => {
     try {
         const blogs = await getAllBlogs();
-        const blog = blogs.find(b => b._id === id);
+        // Support both id and _id for compatibility
+        const blog = blogs.find(b => (b.id || b._id) === id);
         if (blog) showEditor(blog);
     } catch (err) {
         console.error("Edit error:", err);
@@ -214,32 +197,40 @@ const handleEditBlog = async (id) => {
 const handleDeleteBlog = async (id) => {
     if (!id) {
         console.error("No ID provided for deletion");
+        showToast('Error: No blog ID provided', 3000, 'error');
         return;
     }
 
     // Strict Hard Delete Requirement: Single Confirmation
-    if (confirm('Are you sure you want to permanently delete this blog?')) {
-        const btn = document.querySelector(`button[data-id="${id}"]`);
-        const row = btn ? btn.closest('tr') : null;
+    const confirmDelete = window.confirm('Are you sure you want to permanently delete this blog?');
+    if (!confirmDelete) return;
 
-        try {
-            if (row) row.style.opacity = '0.3';
-            showToast('Deleting blog...', 2000);
+    const btn = document.querySelector(`button[data-id="${id}"]`);
+    const row = btn ? btn.closest('tr') : null;
 
-            // 1. Hard Delete from Firestore
-            await deleteBlog(id);
+    try {
+        if (row) row.style.opacity = '0.3';
+        showToast('Deleting blog...', 2000);
 
-            // 2. Immediate UI Update (Remove from DOM)
-            if (row) {
-                row.remove();
-            }
-            showToast('Blog deleted permanently.', 2000, 'success');
+        // 1. Hard Delete from Firestore using actual document ID
+        await deleteBlog(id);
 
-        } catch (error) {
-            console.error("Delete failed:", error);
-            alert('Failed to delete blog: ' + error.message);
-            if (row) row.style.opacity = '1';
+        // 2. Immediate UI Update (Remove from DOM)
+        if (row) {
+            row.remove();
         }
+
+        // 3. Check if list is now empty and show message
+        if (blogsList.querySelectorAll('tr').length === 0) {
+            blogsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #666;">No blogs available. Click "Add New Blog" to create one.</td></tr>`;
+        }
+
+        showToast('Blog deleted permanently.', 2000, 'success');
+
+    } catch (error) {
+        console.error("Delete failed:", error);
+        showToast('Failed to delete blog: ' + (error.message || 'Unknown error'), 3000, 'error');
+        if (row) row.style.opacity = '1';
     }
 };
 
@@ -267,17 +258,21 @@ async function fetchBlogs() {
         if (blogs.length === 0) {
             blogsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #666;">No blogs available. Click "Add New Blog" to create one.</td></tr>`;
         } else {
-            blogsList.innerHTML = blogs.map(blog => `
+            blogsList.innerHTML = blogs.map(blog => {
+                // Use actual Firestore document ID (id takes precedence, fallback to _id for compatibility)
+                const blogId = blog.id || blog._id;
+                return `
                 <tr>
                     <td><img src="${blog.featuredImage || 'https://placehold.co/100x100?text=No+Image'}" class="thumb-small" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
                     <td><strong>${blog.title}</strong></td>
                     <td><span class="badge ${blog.status === 'published' ? 'bg-success' : 'bg-secondary'}">${blog.status}</span></td>
                     <td>
-                        <button class="btn-sm btn-edit" data-id="${blog._id}">Edit</button>
-                        <button class="btn-sm btn-delete" data-id="${blog._id}" style="background-color: #dc3545; color: white; margin-left: 5px;">Delete</button>
+                        <button class="btn-sm btn-edit" data-id="${blogId}">Edit</button>
+                        <button class="btn-sm btn-delete" data-id="${blogId}" style="background-color: #dc3545; color: white; margin-left: 5px;">Delete</button>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
 
             // Note: Event listeners are now handled via delegation above
         }
@@ -302,53 +297,77 @@ blogForm.addEventListener('submit', async (e) => {
     const author = document.getElementById('blog-author').value;
     const status = document.getElementById('blog-status').value;
 
-    let featuredImage = '';
-    const imageInput = document.getElementById('blog-image');
-
-    if (imageInput.files[0]) {
-        try {
-            featuredImage = await uploadImage(imageInput.files[0]);
-        } catch (e) {
-            alert('Image upload failed: ' + e.message);
-            return;
-        }
-    } else {
-        const imgPreview = document.getElementById('image-preview');
-        if (imgPreview.src && imgPreview.style.display !== 'none') {
-            featuredImage = imgPreview.src;
-        }
-    }
-
-    const blogData = {
-        title, slug, description, subHeading, content, author, status, featuredImage
-    };
-
     const submitBtn = blogForm.querySelector('button[type="submit"]');
     const originalBtnText = submitBtn.innerText;
-    const loadingText = isEditing ? 'Updating...' : 'Creating...';
+    const originalBtnHTML = submitBtn.innerHTML;
 
-    submitBtn.innerText = loadingText;
+    // Helper function to update button status
+    const updateButtonStatus = (text, showSpinner = true) => {
+        if (showSpinner) {
+            submitBtn.innerHTML = `<span style="display: inline-block; width: 14px; height: 14px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle;"></span>${text}`;
+        } else {
+            submitBtn.innerHTML = text;
+        }
+    };
+
+    // Disable button immediately and show initial status
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.7';
     submitBtn.style.cursor = 'not-allowed';
+    updateButtonStatus('Processing...', true);
+
+    let featuredImage = '';
+    const imageInput = document.getElementById('blog-image');
 
     try {
+        // Step 1: Upload image if needed
+        if (imageInput.files[0]) {
+            updateButtonStatus('Uploading image...', true);
+            try {
+                featuredImage = await uploadImage(imageInput.files[0]);
+            } catch (e) {
+                submitBtn.innerHTML = originalBtnHTML;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+                showToast('Image upload failed: ' + e.message, 3000, 'error');
+                return;
+            }
+        } else {
+            const imgPreview = document.getElementById('image-preview');
+            if (imgPreview.src && imgPreview.style.display !== 'none') {
+                featuredImage = imgPreview.src;
+            }
+        }
+
+        // Step 2: Save to database
+        updateButtonStatus(isEditing ? 'Saving changes...' : 'Creating blog...', true);
+
+        const blogData = {
+            title, slug, description, subHeading, content, author, status, featuredImage
+        };
+
         if (isEditing) {
             await updateBlog(id, blogData);
-            showToast('Blog updated!', 1500);
+            showToast('Blog updated successfully!', 2000, 'success');
         } else {
             await createBlog(blogData);
-            showToast('Blog created!', 1500);
+            showToast('Blog created successfully!', 2000, 'success');
         }
-        showDashboard();
+
+        // Step 3: Navigate to dashboard
+        updateButtonStatus('Done!', false);
+        setTimeout(() => {
+            showDashboard();
+        }, 300);
+
     } catch (err) {
         console.error(err);
-        alert('Something went wrong: ' + err.message);
-    } finally {
-        submitBtn.innerText = originalBtnText;
+        submitBtn.innerHTML = originalBtnHTML;
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
         submitBtn.style.cursor = 'pointer';
+        showToast('Error: ' + (err.message || 'Failed to save blog'), 3000, 'error');
     }
 });
 
@@ -397,6 +416,10 @@ if (fileForm) {
                 reply_to: 'admin@karunyacharitabletrust.org',
                 from_name: 'Karunya Trust'
             };
+
+            if (typeof emailjs === 'undefined') {
+                throw new Error('EmailJS is not loaded. Please refresh the page.');
+            }
 
             const response = await emailjs.send("service_kihk1eo", "template_e1ugog3", templateParams, "s-yzfkw_g8ZBWm5WJ");
 
@@ -458,30 +481,6 @@ async function fetchFileLogs() {
     }
 }
 
-async function fetchDonations() {
-    try {
-        const donations = await getRecentDonations();
-
-        if (donations.length === 0) {
-            donationsList.innerHTML = `<tr><td colspan="4" style="text-align:center;">No donations found yet.</td></tr>`;
-        } else {
-            donationsList.innerHTML = donations.map(d => `
-                <tr>
-                    <td>${new Date(d.donatedAt).toLocaleString()}</td>
-                    <td>
-                        <strong>${d.donorName || 'Anonymous'}</strong><br>
-                        <small>${d.donorEmail || ''}</small>
-                    </td>
-                    <td>₹${d.amount}</td>
-                    <td><code>${d.paymentId}</code></td>
-                </tr>
-            `).join('');
-        }
-    } catch (error) {
-        console.error('Error fetching donations', error);
-        donationsList.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading data.</td></tr>`;
-    }
-}
 
 // Auto-fill slug from title
 document.getElementById('blog-title').addEventListener('input', (e) => {
@@ -525,12 +524,17 @@ function setupLivePreview() {
         const file = imageInput.files[0];
         const previewContainer = getPreviewEl('#preview-image-container');
         const previewImg = getPreviewEl('#preview-image');
+        const subHeadingEl = getPreviewEl('#preview-subheading');
 
         if (file && previewImg) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 previewImg.src = e.target.result;
                 if (previewContainer) previewContainer.style.display = 'block';
+                // Show subheading if it has content
+                if (subHeadingEl && subHeadingInput.value.trim()) {
+                    subHeadingEl.style.display = 'block';
+                }
             };
             reader.readAsDataURL(file);
         } else if (previewContainer) {
@@ -540,13 +544,20 @@ function setupLivePreview() {
 
     subHeadingInput.addEventListener('input', () => {
         const el = getPreviewEl('#preview-subheading');
-        if (el) el.innerText = subHeadingInput.value;
+        if (el) {
+            if (subHeadingInput.value.trim()) {
+                el.innerText = subHeadingInput.value;
+                el.style.display = 'block';
+            } else {
+                el.innerText = '';
+                el.style.display = 'none';
+            }
+        }
     });
 
     iframe.onload = () => {
         titleInput.dispatchEvent(new Event('input'));
         authorInput.dispatchEvent(new Event('input'));
-        subHeadingInput.dispatchEvent(new Event('input'));
         contentInput.dispatchEvent(new Event('input'));
 
         const dateBlock = getPreviewEl('.blog-read-time-block');
@@ -559,11 +570,15 @@ function setupLivePreview() {
         const existingImg = document.getElementById('image-preview');
         const previewImg = getPreviewEl('#preview-image');
         const previewContainer = getPreviewEl('#preview-image-container');
+        const subHeadingEl = getPreviewEl('#preview-subheading');
 
         if (existingImg && existingImg.src && existingImg.style.display !== 'none' && previewImg) {
             previewImg.src = existingImg.src;
             if (previewContainer) previewContainer.style.display = 'block';
         }
+
+        // Update subheading after image is set
+        subHeadingInput.dispatchEvent(new Event('input'));
     };
 }
 

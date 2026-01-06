@@ -237,9 +237,14 @@ app.post('/api/donations', async (req, res) => {
 // ============ CONFIGURATION ENDPOINT ============
 
 app.get('/api/config', (req, res) => {
-    res.json({
-        razorpayKeyId: process.env.RAZORPAY_KEY_ID
-    });
+    try {
+        res.json({
+            razorpayKeyId: process.env.RAZORPAY_KEY_ID || ''
+        });
+    } catch (error) {
+        console.error('Config endpoint error:', error);
+        res.status(500).json({ error: 'Failed to load configuration' });
+    }
 });
 
 // Specific route for Send Files page (Cloudinary version)
@@ -273,22 +278,35 @@ app.get('/', (req, res) => {
 
 // Fallback for other HTML files
 app.get('/:page', (req, res) => {
-    const page = req.params.page;
-    if (page.endsWith('.html') || page.endsWith('.htm')) {
-        res.sendFile(path.join(__dirname, page), (err) => {
-            if (err) res.status(404).send('Page not found');
-        });
-    } else {
-        res.status(404).send('Page not found');
+    try {
+        const page = req.params.page;
+        // Prevent directory traversal
+        if (page.includes('..') || page.includes('/')) {
+            return res.status(400).send('Invalid page name');
+        }
+        if (page.endsWith('.html') || page.endsWith('.htm')) {
+            res.sendFile(path.join(__dirname, page), (err) => {
+                if (err) {
+                    console.error('File not found:', page, err);
+                    res.status(404).send('Page not found');
+                }
+            });
+        } else {
+            res.status(404).send('Page not found');
+        }
+    } catch (error) {
+        console.error('Route error:', error);
+        res.status(500).send('Internal server error');
     }
 });
 
-// For local testing
-if (process.env.NODE_ENV !== 'production') {
+// Export for Vercel serverless
+module.exports = app;
+
+// For local testing only (Vercel handles this automatically)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }
-
-module.exports = app;

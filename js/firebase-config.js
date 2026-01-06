@@ -7,6 +7,7 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-s
 
 
 // Your web app's Firebase configuration
+// Note: These are client-side public keys, safe to expose
 const firebaseConfig = {
     apiKey: "AIzaSyByQSIOjMyBBOET35gdwBy4UaDIgXfpZok",
     authDomain: "charity-e297e.firebaseapp.com",
@@ -16,11 +17,27 @@ const firebaseConfig = {
     appId: "1:1075506898766:web:4673b175a48b728023a01f"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// Initialize Firebase (client-side only)
+// This code only runs in the browser, not during SSR
+let app, auth, db, storage;
 
+try {
+    if (typeof window !== 'undefined') {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        storage = getStorage(app);
+    } else {
+        // Server-side fallback (should not execute in production)
+        console.warn('Firebase initialization attempted on server-side');
+    }
+} catch (error) {
+    console.error('Firebase initialization error:', error);
+    // Provide fallback objects to prevent crashes
+    app = null;
+    auth = null;
+    db = null;
+    storage = null;
+}
 
 export { auth, db, storage };

@@ -28,15 +28,23 @@ import {
 
 export const loginAdmin = async (email, password) => {
     try {
+        if (!auth) {
+            throw new Error('Firebase auth is not initialized. Please refresh the page.');
+        }
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return userCredential.user;
     } catch (error) {
+        console.error('Login error:', error);
         throw error;
     }
 };
 
 export const logoutAdmin = async () => {
     try {
+        if (!auth) {
+            console.warn('Firebase auth is not initialized');
+            return;
+        }
         await signOut(auth);
     } catch (error) {
         console.error("Logout Error", error);
@@ -44,6 +52,11 @@ export const logoutAdmin = async () => {
 };
 
 export const monitorAuthState = (callback) => {
+    if (!auth) {
+        console.error('Firebase auth is not initialized');
+        callback(null);
+        return;
+    }
     onAuthStateChanged(auth, callback);
 };
 
@@ -53,10 +66,15 @@ const BLOGS_COLLECTION = 'blogs';
 
 export const getAllBlogs = async () => {
     try {
+        if (!db) {
+            console.error('Firestore is not initialized');
+            return [];
+        }
         const q = query(collection(db, BLOGS_COLLECTION), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({
-            _id: doc.id,
+            id: doc.id,
+            _id: doc.id, // Keep _id for backward compatibility
             ...doc.data()
         }));
     } catch (error) {
@@ -67,6 +85,10 @@ export const getAllBlogs = async () => {
 
 export const getBlogBySlug = async (slug) => {
     try {
+        if (!db) {
+            console.error('Firestore is not initialized');
+            return null;
+        }
         const q = query(collection(db, BLOGS_COLLECTION), where("slug", "==", slug));
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) return null;
@@ -80,6 +102,9 @@ export const getBlogBySlug = async (slug) => {
 
 export const createBlog = async (blogData) => {
     try {
+        if (!db) {
+            throw new Error('Firestore is not initialized. Please refresh the page.');
+        }
         const docRef = await addDoc(collection(db, BLOGS_COLLECTION), {
             ...blogData,
             createdAt: new Date().toISOString(),
@@ -87,26 +112,42 @@ export const createBlog = async (blogData) => {
         });
         return docRef.id;
     } catch (error) {
+        console.error('Create blog error:', error);
         throw error;
     }
 };
 
 export const updateBlog = async (id, blogData) => {
     try {
+        if (!db) {
+            throw new Error('Firestore is not initialized. Please refresh the page.');
+        }
+        if (!id) {
+            throw new Error('Blog ID is required for update');
+        }
         const docRef = doc(db, BLOGS_COLLECTION, id);
         await updateDoc(docRef, {
             ...blogData,
             updatedAt: new Date().toISOString()
         });
     } catch (error) {
+        console.error('Update blog error:', error);
         throw error;
     }
 };
 
 export const deleteBlog = async (id) => {
+    if (!id) {
+        throw new Error("Blog ID is required for deletion");
+    }
     try {
-        await deleteDoc(doc(db, BLOGS_COLLECTION, id));
+        if (!db) {
+            throw new Error('Firestore is not initialized. Please refresh the page.');
+        }
+        const docRef = doc(db, BLOGS_COLLECTION, id);
+        await deleteDoc(docRef);
     } catch (error) {
+        console.error("Firestore delete error:", error);
         throw error;
     }
 };
@@ -117,18 +158,27 @@ const REPORTS_COLLECTION = 'sent-reports';
 
 export const createReportLog = async (data) => {
     try {
+        if (!db) {
+            console.warn('Firestore is not initialized, skipping log');
+            return;
+        }
         await addDoc(collection(db, REPORTS_COLLECTION), {
             ...data,
             sentAt: new Date().toISOString(),
             createdAt: new Date().toISOString()
         });
     } catch (error) {
-        throw error;
+        console.error('Create report log error:', error);
+        // Don't throw - logging failures shouldn't break the main flow
     }
 };
 
 export const getFileLogs = async () => {
     try {
+        if (!db) {
+            console.error('Firestore is not initialized');
+            return [];
+        }
         const q = query(collection(db, REPORTS_COLLECTION), orderBy('sentAt', 'desc'));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({
@@ -171,17 +221,21 @@ export const uploadImage = async (file) => {
 // REPORT UPLOAD - Fixed to use correct resource_type and presets
 export const uploadReportFile = async (file) => {
     try {
-        // 1. DYNAMIC FILE TYPE DETECTION
-        // Do NOT rely on file.type alone as it can be unreliable
-        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        // 1. FILE TYPE DETECTION - Use MIME type primarily
+        const isPdf = file.type === 'application/pdf';
 
         // 2. RESOURCE TYPE & PRESET SELECTION
-        // "blog_unsigned" is likely an image-only preset (with transformations)
-        // We use "pdf_raw_unsigned" for RAW files as requested (or fallback to 'blog_unsigned' if not set, but strict endpoint is key)
+        // Images → /image/upload with 'blog_unsigned' preset
+        // PDFs → /raw/upload with 'pdf_raw_unsigned' preset
         const resourceType = isPdf ? 'raw' : 'image';
         const uploadPreset = isPdf ? 'pdf_raw_unsigned' : CLOUDINARY_UPLOAD_PRESET;
 
-        // 3. CORRECT ENDPOINT UPLOAD
+        // 3. CORRECT ENDPOINT - Endpoint decides resource type
+        const uploadUrl = isPdf
+            ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`
+            : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+        // 4. UPLOAD IMPLEMENTATION
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', uploadPreset);
@@ -189,7 +243,7 @@ export const uploadReportFile = async (file) => {
 
         console.log(`Uploading ${file.name} as ${resourceType} using preset ${uploadPreset}`);
 
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, {
+        const response = await fetch(uploadUrl, {
             method: 'POST',
             body: formData
         });
@@ -202,16 +256,15 @@ export const uploadReportFile = async (file) => {
 
         const data = await response.json();
 
+        // 5. HANDLE RESPONSE - Generate download-safe URL for PDFs
         let finalUrl = data.secure_url;
 
-        // 4. FIX URL FOR DOWNLOAD
         if (isPdf && finalUrl) {
-            // raw/upload URLs usually don't have transformations, but we add fl_attachment
-            // to ensure the browser strictly downloads it.
-            // If the URL logic is standard: res.cloudinary.com/<cloud>/raw/upload/v<ver>/<id>.pdf
-            // We want: res.cloudinary.com/<cloud>/raw/upload/fl_attachment/v<ver>/<id>.pdf
-            if (!finalUrl.includes('fl_attachment')) {
-                finalUrl = finalUrl.replace('/upload/', '/upload/fl_attachment/');
+            // For PDFs, add fl_attachment flag to force download
+            // URL format: https://res.cloudinary.com/{cloud}/raw/upload/v{version}/{public_id}.pdf
+            // Target: https://res.cloudinary.com/{cloud}/raw/upload/fl_attachment/v{version}/{public_id}.pdf
+            if (finalUrl.includes('/raw/upload/') && !finalUrl.includes('fl_attachment')) {
+                finalUrl = finalUrl.replace('/raw/upload/', '/raw/upload/fl_attachment/');
             }
         }
 
@@ -228,6 +281,9 @@ export const uploadReportFile = async (file) => {
 // FIREBASE STORAGE UPLOAD
 export const uploadFileToStorage = async (file, onProgress) => {
     try {
+        if (!storage) {
+            throw new Error('Firebase Storage is not initialized. Please refresh the page.');
+        }
         const date = new Date();
         const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const fileName = `${Date.now()}_${file.name}`;
@@ -271,18 +327,83 @@ const DONATIONS_COLLECTION = 'donations';
 
 export const addDonation = async (donationData) => {
     try {
+        if (!db) {
+            throw new Error('Firestore is not initialized. Please refresh the page.');
+        }
         const docRef = await addDoc(collection(db, DONATIONS_COLLECTION), {
             ...donationData,
-            donatedAt: serverTimestamp()
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         });
         return docRef.id;
     } catch (error) {
+        console.error('Add donation error:', error);
         throw error;
+    }
+};
+
+export const updateDonation = async (id, donationData) => {
+    try {
+        if (!db) {
+            throw new Error('Firestore is not initialized. Please refresh the page.');
+        }
+        if (!id) {
+            throw new Error('Donation ID is required for update');
+        }
+        const docRef = doc(db, DONATIONS_COLLECTION, id);
+        await updateDoc(docRef, {
+            ...donationData,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Update donation error:', error);
+        throw error;
+    }
+};
+
+export const deleteDonation = async (id) => {
+    try {
+        if (!db) {
+            throw new Error('Firestore is not initialized. Please refresh the page.');
+        }
+        if (!id) {
+            throw new Error('Donation ID is required for deletion');
+        }
+        await deleteDoc(doc(db, DONATIONS_COLLECTION, id));
+    } catch (error) {
+        console.error('Delete donation error:', error);
+        throw error;
+    }
+};
+
+export const getAllDonations = async () => {
+    try {
+        // Get all donations and sort in memory (avoids Firestore index requirements)
+        const querySnapshot = await getDocs(collection(db, DONATIONS_COLLECTION));
+        const donations = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            _id: doc.id,
+            ...doc.data()
+        }));
+        
+        // Sort by transactionDate (newest first), fallback to createdAt
+        return donations.sort((a, b) => {
+            const dateA = a.transactionDate || a.createdAt || '';
+            const dateB = b.transactionDate || b.createdAt || '';
+            return dateB.localeCompare(dateA);
+        });
+    } catch (error) {
+        console.error("Error fetching donations: ", error);
+        return [];
     }
 };
 
 export const getRecentDonations = async (limitCount = 20) => {
     try {
+        if (!db) {
+            console.error('Firestore is not initialized');
+            return [];
+        }
         const q = query(
             collection(db, DONATIONS_COLLECTION),
             orderBy('donatedAt', 'desc'),
