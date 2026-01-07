@@ -16,7 +16,7 @@ import {
 // Initialize EmailJS (client-side only)
 if (typeof window !== 'undefined' && typeof emailjs !== 'undefined') {
     try {
-        emailjs.init("s-yzfkw_g8ZBWm5WJ");
+        emailjs.init("EXjUjLmLuDHOHsrMZ");
     } catch (e) {
         console.error("EmailJS Init Error:", e);
     }
@@ -421,7 +421,7 @@ if (fileForm) {
                 throw new Error('EmailJS is not loaded. Please refresh the page.');
             }
 
-            const response = await emailjs.send("service_kihk1eo", "template_e1ugog3", templateParams, "s-yzfkw_g8ZBWm5WJ");
+            const response = await emailjs.send("service_xjugpoi", "template_72p6u49", templateParams, "EXjUjLmLuDHOHsrMZ");
 
             console.log("EmailJS Success:", response.status, response.text);
             showToast('Report sent successfully!', 1500);

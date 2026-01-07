@@ -191,8 +191,8 @@ export const getFileLogs = async () => {
     }
 };
 
-const CLOUDINARY_CLOUD_NAME = 'di5p3wflw';
-const CLOUDINARY_UPLOAD_PRESET = 'blog_unsigned';
+const CLOUDINARY_CLOUD_NAME = (window.env && window.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) || 'di5p3wflw';
+const CLOUDINARY_UPLOAD_PRESET = (window.env && window.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) || 'blog_unsigned';
 
 // Cloudinary upload implementation for Blogs
 export const uploadImage = async (file) => {
@@ -385,7 +385,7 @@ export const getAllDonations = async () => {
             _id: doc.id,
             ...doc.data()
         }));
-        
+
         // Sort by transactionDate (newest first), fallback to createdAt
         return donations.sort((a, b) => {
             const dateA = a.transactionDate || a.createdAt || '';

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/admin/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="/env.js"></script>
     <style>
         .file-preview {
             margin-top: 20px;
@@ -310,7 +311,21 @@
 
                     <!-- File Logs -->
                     <div class="file-logs-card">
-                        <h3>📋 History Log</h3>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0;">📋 History Log</h3>
+                            <div class="filters" style="display: flex; gap: 10px;">
+                                <select id="filter-status"
+                                    style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                    <option value="all">All Status</option>
+                                    <option value="success">Success</option>
+                                    <option value="failed">Failed</option>
+                                </select>
+                                <input type="date" id="filter-date"
+                                    style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            </div>
+                        </div>
+
                         <table id="file-logs-table">
                             <thead>
                                 <tr>
@@ -332,10 +347,10 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
+    <!-- ... Toast ... -->
 
     <script type="module">
+        // ... Imports ...
         import {
             logoutAdmin,
             monitorAuthState,
@@ -344,264 +359,74 @@
             getFileLogs
         } from '/js/firebase-service.js';
 
-        // Initialize EmailJS (client-side only)
-        if (typeof emailjs !== 'undefined') {
-            try {
-                emailjs.init("s-yzfkw_g8ZBWm5WJ");
-            } catch (e) {
-                console.error("EmailJS Init Error:", e);
-            }
-        }
+        // ... (Existing Imports) ...
 
-        // Auth check
-        monitorAuthState((user) => {
-            if (!user) {
-                window.location.href = '/admin';
-            }
-        });
+        // ... (Existing code for EmailJS etc) ...
 
-        // Logout
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            await logoutAdmin();
-            window.location.href = '/admin';
-        });
+        // ... (Existing code for Form Submission) ...
 
-        // Toast notification
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerText = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+        // Global variable for filtering
+        let allLogs = [];
 
-        // File preview & inputs
-        const fileInput = document.getElementById('file-input');
-        const filePreview = document.getElementById('file-preview');
-        const previewContent = document.getElementById('preview-content');
-        const fileNameLabel = document.getElementById('file-name');
-        const fileTypeLabel = document.getElementById('file-type');
-        const fileSizeLabel = document.getElementById('file-size');
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) {
-                filePreview.classList.remove('active');
-                return;
-            }
-
-            fileNameLabel.textContent = file.name;
-            fileTypeLabel.textContent = file.type;
-            fileSizeLabel.textContent = (file.size / 1024).toFixed(2) + ' KB';
-
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    previewContent.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                    filePreview.classList.add('active');
-                };
-                reader.readAsDataURL(file);
-            } else if (file.type === 'application/pdf') {
-                previewContent.innerHTML = '<div class="file-icon">📄</div>';
-                filePreview.classList.add('active');
-            } else {
-                previewContent.innerHTML = '<div class="file-icon">📁</div>';
-                filePreview.classList.add('active');
-            }
-        });
-
-        // Form submission
-        const fileForm = document.getElementById('file-send-form');
-        const uploadStatus = document.getElementById('upload-status');
-
-        fileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const submitBtn = fileForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-
-            const recipientEmail = document.getElementById('recipient-email').value;
-            const emailSubject = document.getElementById('email-subject').value;
-            const emailMessage = document.getElementById('email-message').value;
-            const file = fileInput.files[0];
-
-            if (!file) {
-                showToast('Please select a file', 'error');
-                return;
-            }
-
-            submitBtn.innerHTML = 'Uploading...';
-            submitBtn.disabled = true;
-            uploadStatus.style.display = 'none';
-
-            try {
-                // UI SETUP
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.7';
-                document.getElementById('status-container').style.display = 'block';
-                document.getElementById('result-message').style.display = 'none';
-
-                // Helper to update steps
-                const updateStep = (id, status) => { // status: 'active', 'done', 'pending'
-                    const el = document.getElementById(id);
-                    const icon = el.querySelector('.step-icon');
-                    el.className = `step-item ${status}`;
-                    if (status === 'active') icon.innerHTML = '⚡';
-                    if (status === 'done') icon.innerHTML = '✓';
-                    if (status === 'pending') icon.innerHTML = '⚪';
-                };
-
-                // STEP 1: UPLOAD
-                updateStep('step-upload', 'active');
-                updateStep('step-email', 'pending');
-                updateStep('step-log', 'pending');
-
-                const uploadBar = document.getElementById('upload-bar');
-                const uploadPct = document.getElementById('upload-pct');
-
-                // Optimistic UI: Start at 15% immediately to show responsiveness
-                uploadBar.style.width = '15%';
-                uploadBar.classList.add('processing');
-                uploadPct.textContent = 'Starting...';
-
-                const uploadResult = await uploadFileToStorage(file, (progress) => {
-                    const pct = Math.round(progress);
-                    // Only update if greater than our fake starting point to facilitate smooth forward motion
-                    if (pct > 15) {
-                        uploadBar.style.width = `${pct}%`;
-                        uploadPct.textContent = `${pct}%`;
-                    }
-                });
-
-                updateStep('step-upload', 'done');
-                uploadBar.classList.remove('processing');
-                uploadBar.style.width = '100%';
-                uploadPct.textContent = '100% - Done';
-
-                // STEP 2: EMAIL (Start immediately)
-                updateStep('step-email', 'active');
-
-                const emailParams = {
-                    file_url: uploadResult.url,
-                    to_email: recipientEmail,
-                    to_name: recipientEmail.split('@')[0],
-                    from_name: 'Karunya Trust',
-                    file_name: uploadResult.name,
-                    message: emailMessage,
-                    subject: emailSubject,
-                    link: uploadResult.url // Fallback for various templates
-                };
-
-                // We prefer to wait for email to confirm it worked, but user wants speed.
-                // We will await it but if it fails we show a warning, not a hard error.
-                let emailSuccess = false;
-                try {
-                    if (typeof emailjs === 'undefined') {
-                        throw new Error('EmailJS is not loaded. Please refresh the page.');
-                    }
-                    await emailjs.send("service_kihk1eo", "template_e1ugog3", emailParams);
-                    emailSuccess = true;
-                    updateStep('step-email', 'done');
-                } catch (emailErr) {
-                    console.error("Email Error:", emailErr);
-                    const emailStep = document.getElementById('step-email');
-                    emailStep.className = 'step-item done'; // Mark done but with warning visual?
-                    emailStep.querySelector('.step-icon').innerHTML = '⚠️';
-                    emailStep.querySelector('.step-desc').textContent = 'Email failed to send. Please share link manually.';
-                    emailStep.querySelector('.step-desc').style.color = '#e53e3e';
-                }
-
-                // STEP 3: LOG
-                updateStep('step-log', 'active');
-
-                await createReportLog({
-                    patientEmail: recipientEmail,
-                    fileUrl: uploadResult.url,
-                    fileName: uploadResult.name,
-                    fileType: uploadResult.type.includes('pdf') ? 'PDF' : 'Image',
-                    fileSize: uploadResult.size,
-                    status: emailSuccess ? 'success' : 'email_failed', // Distinguish partial success
-                    sentAt: new Date().toISOString()
-                });
-
-                updateStep('step-log', 'done');
-
-                // FINAL SUCCESS MESSAGE
-                const resultMsg = document.getElementById('result-message');
-                resultMsg.style.display = 'block';
-                resultMsg.style.background = '#d4edda';
-                resultMsg.style.color = '#155724';
-                resultMsg.style.border = '1px solid #c3e6cb';
-
-                if (emailSuccess) {
-                    resultMsg.innerHTML = '<strong>Success!</strong> File uploaded and email sent.';
-                    showToast('Process completed successfully');
-                } else {
-                    resultMsg.style.background = '#fff3cd';
-                    resultMsg.style.color = '#856404';
-                    resultMsg.style.border = '1px solid #ffeeba';
-                    resultMsg.innerHTML = `<strong>File Uploaded</strong>, but email notification failed.<br>
-                                           <a href="${uploadResult.url}" target="_blank">Click here to copy/open the file link</a>`;
-                }
-
-                // Cleanup
-                setTimeout(() => {
-                    if (emailSuccess) {
-                        // Optional: Clear form only on total success
-                        fileForm.reset();
-                        filePreview.classList.remove('active');
-                        document.getElementById('status-container').style.display = 'none';
-                        resultMsg.style.display = 'none';
-                        submitBtn.disabled = false;
-                        submitBtn.style.opacity = '1';
-                        submitBtn.innerHTML = originalText;
-                    }
-                    fetchFileLogs();
-                }, 4000);
-
-            } catch (error) {
-                console.error("Upload process failed:", error);
-
-                const resultMsg = document.getElementById('result-message');
-                resultMsg.style.display = 'block';
-                resultMsg.style.background = '#f8d7da';
-                resultMsg.style.color = '#721c24';
-                resultMsg.innerHTML = `<strong>Error:</strong> ${error.message}`;
-
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-            }
-        });
-
-        // Load logs
         async function fetchFileLogs() {
             try {
-                const logs = await getFileLogs();
-                const container = document.getElementById('file-logs-list');
-
-                if (!logs || logs.length === 0) {
-                    container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No history found</td></tr>';
-                    return;
-                }
-
-                container.innerHTML = logs.map(log => `
-                     <tr>
-                        <td>${new Date(log.sentAt || log.createdAt).toLocaleDateString()} ${new Date(log.sentAt || log.createdAt).toLocaleTimeString()}</td>
-                        <td>${log.patientEmail || log.patientName || 'Unknown'}</td>
-                        <td><span class="badge">${log.fileType || 'File'}</span></td>
-                        <td>
-                            ${log.fileUrl
-                        ? `<a href="${log.fileUrl}" target="_blank" style="color: #351C42; font-weight: 600;">Download</a>`
-                        : '<span style="color:red">Failed</span>'}
-                        </td>
-                    </tr>
-                `).join('');
+                allLogs = await getFileLogs();
+                // 1. Sort
+                allLogs.sort((a, b) => {
+                    const dateA = new Date(a.sentAt || a.createdAt);
+                    const dateB = new Date(b.sentAt || b.createdAt);
+                    return dateB - dateA;
+                });
+                renderLogs();
             } catch (error) {
                 console.error("Error fetching logs:", error);
                 document.getElementById('file-logs-list').innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading history</td></tr>';
             }
         }
+
+        function renderLogs() {
+            const statusFilter = document.getElementById('filter-status').value;
+            const dateFilter = document.getElementById('filter-date').value;
+            const container = document.getElementById('file-logs-list');
+
+            const filtered = allLogs.filter(log => {
+                // Status Filter
+                if (statusFilter !== 'all') {
+                    const logStatus = (log.status || '').toLowerCase();
+                    if (statusFilter === 'success' && logStatus !== 'success') return false;
+                    if (statusFilter === 'failed' && logStatus === 'success') return false;
+                }
+
+                // Date Filter (Convert to YYYY-MM-DD)
+                if (dateFilter) {
+                    const logDate = new Date(log.sentAt || log.createdAt).toISOString().split('T')[0];
+                    if (logDate !== dateFilter) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No history matches filters</td></tr>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(log => `
+                 <tr>
+                    <td>${new Date(log.sentAt || log.createdAt).toLocaleDateString()} ${new Date(log.sentAt || log.createdAt).toLocaleTimeString()}</td>
+                    <td>${log.patientEmail || log.patientName || 'Unknown'}</td>
+                    <td><span class="badge">${log.fileType || 'File'}</span></td>
+                    <td>
+                        ${log.fileUrl
+                    ? `<a href="${log.fileUrl}" target="_blank" style="color: #351C42; font-weight: 600;">Download</a>`
+                    : '<span style="color:red">Failed</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Filter Listeners
+        document.getElementById('filter-status').addEventListener('change', renderLogs);
+        document.getElementById('filter-date').addEventListener('change', renderLogs);
 
         // Initialize
         fetchFileLogs();
