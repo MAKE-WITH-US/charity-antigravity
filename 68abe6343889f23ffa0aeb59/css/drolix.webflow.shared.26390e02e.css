@@ -4213,7 +4213,7 @@ figure {
 
 .about-hero-wrapper.about {
   background-color: var(--color--black-color);
-  background-image: linear-gradient(#0a0a0acc 10%, #0000 50% 45%, #0a0a0af2 95%), url("../68afe5c487ecebc87571d82e_About Hero Image-min.jpg");
+  background-image: linear-gradient(#0a0a0acc 10%, #0000 50% 45%, #0a0a0af2 95%), url("../../assets/Hospital\ Waiting\ Bench\ -\ Hope_converted.avif");
   background-position: 0 0, 50%;
   background-size: auto, cover;
   border-radius: 16px;
@@ -4289,7 +4289,7 @@ figure {
 }
 
 .be-a-volunteer-section {
-  background-image: linear-gradient(90deg, #0a0a0ae6, #0a0a0a40), linear-gradient(90deg, #1c3042a6, #0000 75%), url("../68b00ff2460925664fde5c05_Volunteer Section BG-min.jpg");
+  background-image: linear-gradient(90deg, #0a0a0ae6, #0a0a0a40), linear-gradient(90deg, #1c3042a6, #0000 75%), url("../../assets/happy-senior-man-handshaking-with-female-doctor-while-talking-lobby-clinic_converted.avif");
   background-position: 0 0, 0 0, 50%;
   background-size: auto, auto, cover;
 }
@@ -4825,7 +4825,7 @@ figure {
 
 .feature-hero-wrapper {
   background-color: var(--color--black-color);
-  background-image: linear-gradient(#0000, #0000 0% 0%, #0000 20%, #0a0a0ad9), url("../68da11351054d5c4b014f923_Service Hero Image.jpg");
+  background-image: linear-gradient(#0000, #0000 0% 0%, #0000 20%, #0a0a0ad9), url("../../assets/doctor-checking-one-her-patients_converted.avif");
   background-position: 0 0, 50%;
   background-size: auto, cover;
   border-radius: 16px;
