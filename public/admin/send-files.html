@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Files - Admin Panel</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
-    <link rel="manifest" href="../../favicon/site.webmanifest">
-    <link rel="shortcut icon" href="../../favicon/favicon.ico">
-    <link rel="icon" type="image/png" sizes="192x192" href="../../favicon/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="../../favicon/android-chrome-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/../favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/../favicon/favicon-16x16.png">
+    <link rel="manifest" href="/../favicon/site.webmanifest">
+    <link rel="shortcut icon" href="/../favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="/../favicon/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/../favicon/android-chrome-512x512.png">
     <link rel="stylesheet" href="/admin/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -98,7 +98,7 @@
                     <h1>Send Files</h1>
                 </div>
                 <div class="header-right">
-                    <button onclick="window.location.href='/admin'" class="nav-btn">← Back to Dashboard</button>
+                    <button onclick="window.location.href='/admin'" class="nav-btn">â† Back to Dashboard</button>
                     <button id="logout-btn">Logout</button>
                 </div>
             </header>
@@ -112,7 +112,7 @@
                 <div class="file-send-container">
                     <!-- Upload Form -->
                     <div class="file-form-card">
-                        <h3>📤 New File Transfer</h3>
+                        <h3>ðŸ“¤ New File Transfer</h3>
                         <form id="file-send-form">
                             <div class="form-group">
                                 <label>Patient Name *</label>
@@ -159,7 +159,7 @@
                     <div class="file-logs-card">
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 style="margin: 0;">📋 Recent Transfers</h3>
+                            <h3 style="margin: 0;">ðŸ“‹ Recent Transfers</h3>
                             <div class="filters" style="display: flex; gap: 10px;">
                                 <select id="filter-status"
                                     style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
@@ -263,7 +263,7 @@
                 };
                 reader.readAsDataURL(file);
             } else if (file.type === 'application/pdf') {
-                previewContent.innerHTML = '<div class="file-icon">📄</div>';
+                previewContent.innerHTML = '<div class="file-icon">ðŸ“„</div>';
                 filePreview.classList.add('active');
             }
         });
@@ -348,7 +348,7 @@
             } catch (error) {
                 console.error(error);
                 uploadStatus.className = 'upload-status error';
-                uploadStatus.textContent = '✗ Error: ' + (error.text || error.message);
+                uploadStatus.textContent = 'âœ— Error: ' + (error.text || error.message);
                 alert('Email Send Failed: ' + (error.text || error.message));
 
                 try {
@@ -452,3 +452,4 @@
 </body>
 
 </html>
+

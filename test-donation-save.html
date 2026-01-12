@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -78,10 +78,10 @@
 
                 const docId = await addDonation(testDonation);
 
-                resultDiv.textContent = `✓ Success! Donation saved with ID: ${docId}. Check the admin panel to see it.`;
+                resultDiv.textContent = `âœ“ Success! Donation saved with ID: ${docId}. Check the admin panel to see it.`;
                 resultDiv.className = 'success';
             } catch (error) {
-                resultDiv.textContent = `✗ Error: ${error.message}`;
+                resultDiv.textContent = `âœ— Error: ${error.message}`;
                 resultDiv.className = 'error';
                 console.error('Error saving donation:', error);
             }
@@ -90,3 +90,4 @@
 </body>
 
 </html>
+
